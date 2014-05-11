@@ -9,6 +9,8 @@ grails {
             queryPort = 10011
             username = ''
             password = ''
+            nick = 'TeamSpeak3GrailsPlugin'
+            announceBot = false
         }
 
     }
