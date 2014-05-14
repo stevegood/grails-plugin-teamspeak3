@@ -28,7 +28,7 @@ Chat bot
 To add chat bot functionality add the teamSpeakService similar to the following:
 
     teamSpeakService.initChatBot { TextMessageEvent event ->
-        if (event.message.startsWith('!') { // check to see if the message is formatted as a message
+        if (event.message.startsWith('!')) { // check to see if the message is formatted as a message
             switch(event.message) {
                 case '!sayHello':
                     sendMessage "Hello ${event.invokerName}, it's nice to see you."
