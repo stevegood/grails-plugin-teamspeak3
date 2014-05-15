@@ -29,3 +29,5 @@
 # "temporary" build files
 /target
 *.iml
+.idea
+*.log
