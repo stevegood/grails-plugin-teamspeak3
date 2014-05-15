@@ -22,26 +22,30 @@ class TeamSpeakService {
     TS3Query ts3Query
     TS3Api ts3Api
     def grailsApplication
+    private boolean connected = false
 
     @PostConstruct
     void init() {
-        println 'init'
-        def config = grailsApplication.mergedConfig.grails.plugin.teamspeak3
-        println config
+        if (!connected) {
+            println 'init'
+            def config = grailsApplication.mergedConfig.grails.plugin.teamspeak3
+            println config
 
-        if (!config?.username?.size() || !config?.password?.size())
-            throw new Exception('TeamSpeak3 username and password are required to use the TeakSpeak3 plugin!')
+            if (!config?.username?.size() || !config?.password?.size())
+                throw new Exception('TeamSpeak3 username and password are required to use the TeakSpeak3 plugin!')
 
-        ts3Config = new TS3Config()
-        ts3Config.host = config.host
-        ts3Config.setLoginCredentials(config.username, config.password)
+            ts3Config = new TS3Config()
+            ts3Config.host = config.host
+            ts3Config.setLoginCredentials(config.username, config.password)
 
-        ts3Query = new TS3Query(ts3Config)
-        ts3Query.connect()
+            ts3Query = new TS3Query(ts3Config)
+            ts3Query.connect()
+            connected = true
 
-        ts3Api = ts3Query.api
-        ts3Api.selectVirtualServerById(1)
-        println 'init complete!'
+            ts3Api = ts3Query.api
+            ts3Api.selectVirtualServerById(1)
+            println 'init complete!'
+        }
     }
 
     def initChatBot(Closure closure) {
@@ -49,11 +53,6 @@ class TeamSpeakService {
         ts3Api.nickname = config.nick
 
         ts3Api.unregisterAllEvents()
-
-        if (config.annouceBot) {
-            println 'Announcing chatBot'
-            ts3Api.sendChannelMessage("${ts3Api.nickname} is now online!")
-        }
 
         Closure closureClone = closure.clone()
         closureClone.delegate = this
@@ -67,7 +66,13 @@ class TeamSpeakService {
             }
 
             @Override
-            void onClientJoin(ClientJoinEvent e) {}
+            void onClientJoin(ClientJoinEvent e) {
+                println "${e.clientNickname} joined..."
+                if (config.annouceBot && e.clientNickname == ts3Api.nickname) {
+                    println 'Announcing chatBot'
+                    ts3Api.sendChannelMessage "${ts3Api.nickname} is now online!"
+                }
+            }
 
             @Override
             void onClientLeave(ClientLeaveEvent e) {}
