@@ -3,14 +3,8 @@ package org.stevegood.teamspeak3
 import com.github.theholywaffle.teamspeak3.TS3Api
 import com.github.theholywaffle.teamspeak3.TS3Config
 import com.github.theholywaffle.teamspeak3.TS3Query
-import com.github.theholywaffle.teamspeak3.api.event.ChannelDescriptionEditedEvent
-import com.github.theholywaffle.teamspeak3.api.event.ChannelEditedEvent
-import com.github.theholywaffle.teamspeak3.api.event.ClientJoinEvent
-import com.github.theholywaffle.teamspeak3.api.event.ClientLeaveEvent
-import com.github.theholywaffle.teamspeak3.api.event.ClientMovedEvent
-import com.github.theholywaffle.teamspeak3.api.event.ServerEditedEvent
-import com.github.theholywaffle.teamspeak3.api.event.TS3Listener
-import com.github.theholywaffle.teamspeak3.api.event.TextMessageEvent
+import com.github.theholywaffle.teamspeak3.api.event.*
+import com.github.theholywaffle.teamspeak3.api.wrapper.Channel
 
 import javax.annotation.PostConstruct
 
@@ -56,39 +50,51 @@ class TeamSpeakService {
 
         Closure closureClone = closure.clone()
         closureClone.delegate = this
-        closureClone.resolveStrategy = Closure.DELEGATE_ONLY
+        closureClone.resolveStrategy = Closure.DELEGATE_FIRST
 
-        ts3Api.registerAllEvents()
-        ts3Api.addTS3Listeners(new TS3Listener() {
+        TS3Listener ts3Listener = new TS3Listener() {
             @Override
-            void onTextMessage(TextMessageEvent e) {
-                closureClone(e)
+            void onTextMessage(TextMessageEvent textMessageEvent) {
+                closureClone(textMessageEvent)
             }
 
             @Override
-            void onClientJoin(ClientJoinEvent e) {
-                println "${e.clientNickname} joined..."
-                if (config.annouceBot && e.clientNickname == ts3Api.nickname) {
-                    println 'Announcing chatBot'
-                    ts3Api.sendChannelMessage "${ts3Api.nickname} is now online!"
-                }
+            void onClientJoin(ClientJoinEvent clientJoinEvent) {
+
             }
 
             @Override
-            void onClientLeave(ClientLeaveEvent e) {}
+            void onClientLeave(ClientLeaveEvent clientLeaveEvent) {
+
+            }
 
             @Override
-            void onServerEdit(ServerEditedEvent e) {}
+            void onServerEdit(ServerEditedEvent serverEditedEvent) {
+
+            }
 
             @Override
-            void onChannelEdit(ChannelEditedEvent e) {}
+            void onChannelEdit(ChannelEditedEvent channelEditedEvent) {
+
+            }
 
             @Override
-            void onChannelDescriptionChanged(ChannelDescriptionEditedEvent e) {}
+            void onChannelDescriptionChanged(ChannelDescriptionEditedEvent channelDescriptionEditedEvent) {
+
+            }
 
             @Override
-            void onClientMoved(ClientMovedEvent e) {}
-        })
+            void onClientMoved(ClientMovedEvent clientMovedEvent) {
+
+            }
+        }
+
+        ts3Api.channels.each { Channel channel ->
+            ts3Api.registerEvent(TS3EventType.TEXT_CHANNEL, channel.id)
+            ts3Api.registerEvent(TS3EventType.TEXT_PRIVATE, channel.id)
+        }
+
+        ts3Api.addTS3Listeners(ts3Listener)
     }
 
     def getClients() {
@@ -97,5 +103,9 @@ class TeamSpeakService {
 
     def sendMessage(String message) {
         ts3Api.sendChannelMessage(message)
+    }
+
+    def broadcastMessage(String message) {
+        ts3Api.broadcast message
     }
 }
