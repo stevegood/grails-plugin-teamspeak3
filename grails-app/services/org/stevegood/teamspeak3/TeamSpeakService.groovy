@@ -105,6 +105,10 @@ class TeamSpeakService {
         ts3Api.sendChannelMessage(message)
     }
 
+    def sendPrivateMessage(int clientId, String message) {
+        ts3Api.sendPrivateMessage clientId, message
+    }
+
     def broadcastMessage(String message) {
         ts3Api.broadcast message
     }
