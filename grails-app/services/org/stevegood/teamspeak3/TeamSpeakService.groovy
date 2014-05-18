@@ -25,25 +25,35 @@ class TeamSpeakService {
     void init() {
         if (!connected) {
             println 'init'
-            def config = grailsApplication.mergedConfig.grails.plugin.teamspeak3
-            println config
-
-            if (!config?.username?.size() || !config?.password?.size())
-                throw new Exception('TeamSpeak3 username and password are required to use the TeakSpeak3 plugin!')
-
-            ts3Config = new TS3Config()
-            ts3Config.host = config.host
-            ts3Config.setLoginCredentials(config.username, config.password)
-
-            ts3Query = new TS3Query(ts3Config)
-            ts3Query.connect()
-            connected = true
-
-            ts3Api = ts3Query.api
-            ts3Api.selectVirtualServerById(1)
-            ts3Api.nickname = config.nick
+            connect()
             println 'init complete!'
         }
+    }
+
+    def connect() {
+        def config = grailsApplication.mergedConfig.grails.plugin.teamspeak3
+        println config
+
+        if (!config?.username?.size() || !config?.password?.size())
+            throw new Exception('TeamSpeak3 username and password are required to use the TeakSpeak3 plugin!')
+
+        ts3Config = new TS3Config()
+        ts3Config.host = config.host
+        ts3Config.setLoginCredentials(config.username, config.password)
+
+        ts3Query = new TS3Query(ts3Config)
+        ts3Query.connect()
+        connected = true
+
+        ts3Api = ts3Query.api
+        ts3Api.selectVirtualServerById(1)
+        ts3Api.nickname = config.nick
+    }
+
+    def exit() {
+        ts3Api.unregisterAllEvents()
+        ts3Api.removeTS3Listeners(chatListener, joinListener, leaveListener)
+        ts3Query.exit()
     }
 
     def initChatBot(Closure closure) {
