@@ -17,6 +17,7 @@ Add the following to your Config.groovy, replacing the values with those that co
                 password = ''
                 nick = 'TeamSpeak3GrailsPlugin'
                 announceBot = false
+                autoconnect = false
             }
     
         }
