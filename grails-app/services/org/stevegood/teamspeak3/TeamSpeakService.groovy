@@ -23,10 +23,8 @@ class TeamSpeakService {
 
     @PostConstruct
     void init() {
-        if (!connected) {
-            println 'init'
+        if (!connected && grailsApplication.mergedConfig.grails.plugin.teamspeak3.autoconnect) {
             connect()
-            println 'init complete!'
         }
     }
 

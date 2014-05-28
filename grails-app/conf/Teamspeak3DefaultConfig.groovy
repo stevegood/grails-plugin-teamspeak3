@@ -11,6 +11,7 @@ grails {
             password = ''
             nick = 'TeamSpeak3GrailsPlugin'
             announceBot = false
+            autoconnect = false
         }
 
     }
